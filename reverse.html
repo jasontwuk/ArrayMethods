@@ -1,0 +1,128 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function reverse(array){
+//     var arrayLength = array.length;
+//     var newArray = [];
+    
+//     for(var i = arrayLength - 1, x = 0; i > -1, x < arrayLength ; i--, x++){
+//         newArray[x] = array[i];
+//     }
+
+//     for(var z = 0; z < arrayLength; z++){
+//         array[z] = newArray[z];
+//     }
+
+//     return array;
+// }
+
+// Function signature:
+//  function reverse(array)
+
+// callback parameters:
+
+// Return value:
+//  It should return an array that is reversed, the first element becomes the last, vice versa.
+
+
+function reverse(array){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var newArray = [];
+
+    if(Array.isArray(array) === false){
+        throw new Error('"' + array + '" is not an array');
+    }
+
+    for(var i = arrayLength - 1, x = 0; i > -1, x < arrayLength ; i--, x++){
+        newArray[x] = array[i];
+    }
+
+    for(var z = 0; z < arrayLength; z++){
+        array[z] = newArray[z];
+    }
+
+    return array;
+}
+
+tests({
+    "(1) It should return an array that is reversed, the first element becomes the last, vice versa.": function() {
+        var arrayBeingReversed = [1, 2, 3];
+        var reverseResult = reverse(arrayBeingReversed);
+        eq(reverseResult.length, 3);
+        eq(reverseResult[0], 3);
+        eq(reverseResult[1], 2);
+        eq(reverseResult[2], 1);
+    },
+    "(2) It should change the original array.": function() {
+        var arrayBeingReversed = ["a", "b", "c"];
+        reverse(arrayBeingReversed);
+        eq(arrayBeingReversed.length, 3);
+        eq(arrayBeingReversed[0], "c");
+        eq(arrayBeingReversed[1], "b");
+        eq(arrayBeingReversed[2], "a");
+    },
+    "(3) It should reverse arrays with holes.": function() {
+        var arrayBeingReversed = [, "b", "c"];
+        reverse(arrayBeingReversed);
+        eq(arrayBeingReversed.length, 3);
+        eq(arrayBeingReversed[0], "c");
+        eq(arrayBeingReversed[1], "b");
+        eq(arrayBeingReversed[2], undefined);
+    },
+    "(4) It should not reverse the last element when it is a hole.": function() {
+        var arrayBeingReversed = [ "a", "b",];
+        reverse(arrayBeingReversed);
+        eq(arrayBeingReversed.length, 2);
+        eq(arrayBeingReversed[0], "b");
+        eq(arrayBeingReversed[1], "a");
+    },
+    "(5) It should reverse the array as usual even if it has NaN.": function() {
+        var arrayBeingReversed = [ "a", "b", NaN];
+        reverse(arrayBeingReversed);
+        eq(arrayBeingReversed.length, 3);
+        eq(isNaN(arrayBeingReversed[0]), true);
+        eq(arrayBeingReversed[1], "b");
+        eq(arrayBeingReversed[2], "a");
+    },
+    "(6) It should throw an error when the first argument is not an array.": function() {
+        var isError1 = false;
+        try {
+            // string
+            reverse("This is a string");
+        } catch (e) {
+            isError1 = e instanceof Error;
+        }
+        eq(isError1, true);
+
+        var isError2 = false;
+        try {
+            // boolean
+            reverse(true);
+        } catch (e) {
+            isError2 = e instanceof Error;
+        }
+        eq(isError2, true);
+
+        var isError3 = false;
+        try {
+            // number
+            reverse(999);
+        } catch (e) {
+            isError3 = e instanceof Error;
+        }
+        eq(isError3, true);
+
+        var isError4 = false;
+        try {
+            // object
+            reverse({name: 'Apple', number: 3, color: 'red'});
+        } catch (e) {
+            isError4 = e instanceof Error;
+        }
+        eq(isError4, true);
+    }
+});
+
+</script>

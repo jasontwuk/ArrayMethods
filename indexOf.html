@@ -1,0 +1,90 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function indexOf(array, searchElement, fromIndex){
+//     var arrayLength = array.length;
+//     for(var i = 0; i < arrayLength; i++){
+//         if(array[i] === searchElement){
+//             return i;
+//         }
+//     }
+//     return -1;
+// }
+
+// Function signature:
+//  function indexOf(array, searchElement [, fromIndex])
+
+// callback parameters:
+
+// Return value:
+//  Return the 'first index of a given element' in the array.
+//  If not present, return -1.
+
+
+function indexOf(array, searchElement, fromIndex){
+    var startingIndex = 0;
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+
+    // no element in array
+    if(arrayLength === 0 ){
+        return -1;
+    }
+
+    // has fromIndex
+    if(arguments.length > 2){
+        
+        // fromIndex greater or equal to array length
+        if(fromIndex >= arrayLength){
+            return -1;
+        }
+        // has fromIndex => startingIndex equal to fromIndex
+        // fromIndex < 0 => startingIndex equal to arrayLength plus fromIndex
+        startingIndex = fromIndex < 0 ? arrayLength + fromIndex : fromIndex;
+    }
+
+    for(var i = startingIndex; i < arrayLength; i++){
+        if(array[i] === searchElement){
+            return i;
+        }
+    }
+    return -1;
+}
+
+tests({
+    "(1) It should stop the loop and return the index when it find a true value, when no fromIndex.": function() {
+        var indexOfResult = indexOf([1, 2, 3, 1, 2, 3], 1);
+        eq(indexOfResult, 0);
+    },
+    "(2) It should stop the loop and return the index when it find a true value, when has fromIndex.": function(){
+        var indexOfResult = indexOf([1, 2, 3, 1, 2, 3], 1, 2);
+        eq(indexOfResult, 3);
+    },
+    '(3) It should return "-1" when no true value.': function(){
+        var indexOfResult = indexOf([, 1, , 2, 3], 5);
+        eq(indexOfResult, -1);
+    },
+    '(4) It should return "-1" when array is empty.': function(){
+        var indexOfResult = indexOf([], 1);
+        eq(indexOfResult, -1);
+    },
+    '(5) It should return "-1" when fromIndex equal or greater than array length': function(){
+        var indexOfResult = indexOf([1, 2, 3], 1, 5);
+        eq(indexOfResult, -1);
+    },
+    '(6) It should offset from the end of the array when fromIndex is negative.': function(){
+        var indexOfResult = indexOf([1, 2, 3, 1, 2, 3], 1, -3);
+        eq(indexOfResult, 3);
+    },
+    "(7) It should search from front to back, even if the fromIndex is negative.": function(){
+        var indexOfResult = indexOf(['a', 'b', 'c', 'a', 'b', 'c'], 'c', -6);
+        eq(indexOfResult, 2);
+    },
+    '(8) It should search the whole array when fromIndex is 0.': function(){
+        var indexOfResult = indexOf([1, 2, 3], 3, 0);
+        eq(indexOfResult, 2);
+    }
+});
+
+</script>

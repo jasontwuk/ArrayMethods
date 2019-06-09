@@ -1,0 +1,185 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function sort(array, callback){
+//     var arrayLength = array.length;
+
+//     function defaultCompare(a, b){
+//         return String(a) > String(b);
+//     }
+    
+//     for(var i = 0; i < arrayLength; i++){
+//         for(var y = i + 1; y < arrayLength; y++){
+//             if(callback(array[i], array[y]) > 0){
+//                 var elementToSwap = array[i];
+//                 array[i] = array[y];
+//                 array[y] = elementToSwap;
+//             };
+//         }
+//     }
+//     return array;
+// }
+
+// Function signature:
+//  function sort(array[, compareFunction]])
+
+// callback parameters:
+//  firstElement
+//  secondElement
+
+// Return value:
+//  It should return the sorted array.
+//  The default sort order is built upon converting the elements into strings, 
+//  then comparing their sequences of UTF-16 code units values.
+
+
+function sort(array, callback){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    // default compare function
+    function defaultCompare(a, b){
+        // String() convert different objects to string
+        return String(a) > String(b);
+    }
+
+    // change default compare function to callback function
+    callback = callback ? callback : defaultCompare;
+    
+    // according to defaultCompare, compare a and b, if a > b, swap their position
+    for(var i = 0; i < arrayLength; i++){
+        for(var y = i + 1; y < arrayLength; y++){
+            if(callback(array[i], array[y]) > 0){
+                // copy the element
+                var elementToSwap = array[i];
+                // swap the first element
+                array[i] = array[y];
+                // swap the second element
+                array[y] = elementToSwap;
+            };
+        }
+    }
+    return array;
+}
+
+tests({
+    "(1) It should return the sorted array.": function(){
+        var arrayBeingsorted = ["b", "c", "a"];
+        var sortResult = sort(arrayBeingsorted);
+        eq(Array.isArray(sortResult), true);
+        eq(arrayBeingsorted[0], "a");
+        eq(arrayBeingsorted[1], "b");
+        eq(arrayBeingsorted[2], "c");
+    },
+    "(2) It should not change the array length.": function(){
+        var arrayBeingsorted = ["b", "c", "a"];
+        sort(arrayBeingsorted);
+        eq(arrayBeingsorted.length, 3);
+    },
+    "(3) It should convert elements to strings and comparing string in UTF-16 code units order when no callback.": function(){
+        // elements are not string
+        var arrayBeingsorted1 = [2222, 44, 11111, 5, 333];
+        sort(arrayBeingsorted1);
+        eq(arrayBeingsorted1[0], 11111);
+        eq(arrayBeingsorted1[1], 2222);
+        eq(arrayBeingsorted1[2], 333);
+        eq(arrayBeingsorted1[3], 44);
+        eq(arrayBeingsorted1[4], 5);
+    },
+    "(4) It should return an sorted array with comparing element's value when has callback(this callback doesn't turn elements to string).": function(){
+        // elements are not string
+        var arrayBeingsorted = [2222, 44, 11111, 5, 333];
+        sort(arrayBeingsorted, (a, b) => a - b);
+        eq(arrayBeingsorted[0], 5);
+        eq(arrayBeingsorted[1], 44);
+        eq(arrayBeingsorted[2], 333);
+        eq(arrayBeingsorted[3], 2222);
+        eq(arrayBeingsorted[4], 11111);
+    },
+    "(5) It should compare strings in UTF-16 code units order when no callback.": function(){
+        // elements are string
+        var arrayBeingsorted2 = ["cherry", "apple", "banana"];
+        sort(arrayBeingsorted2);
+        eq(arrayBeingsorted2[0], "apple");
+        eq(arrayBeingsorted2[1], "banana");
+        eq(arrayBeingsorted2[2], "cherry");
+    },
+    '(6) It should return the same result as (5) when has callback(a, b) is comparing a > b.': function(){
+        // elements are string
+        var arrayBeingsorted = ["cherry", "apple", "banana"];
+        sort(arrayBeingsorted, (a, b) => a > b);
+        eq(arrayBeingsorted[0], "apple");
+        eq(arrayBeingsorted[1], "banana");
+        eq(arrayBeingsorted[2], "cherry");
+    },
+    "(7) It should sort all undefined elements to the end of the array (with no call to callback).": function(){
+        var arrayBeingsorted = [undefined, 3, undefined, 1, 2];
+        sort(arrayBeingsorted);
+        eq(arrayBeingsorted[0], 1);
+        eq(arrayBeingsorted[1], 2);
+        eq(arrayBeingsorted[2], 3);
+        eq(arrayBeingsorted[3], undefined);
+        eq(arrayBeingsorted[4], undefined);
+    },
+    "(8) It should return an ascending array when callback(a, b) is comparing a - b or a > b.": function(){
+        var arrayBeingsorted = [2, 4, 1, 5, 3];
+        sort(arrayBeingsorted, function(a, b){
+            return a - b;
+        });
+        eq(arrayBeingsorted[0], String(1));
+        eq(arrayBeingsorted[1], String(2));
+        eq(arrayBeingsorted[2], String(3));
+        eq(arrayBeingsorted[3], String(4));
+        eq(arrayBeingsorted[4], String(5));
+
+        sort(arrayBeingsorted, function(a, b){
+            return a > b;
+        });
+        eq(arrayBeingsorted[0], String(1));
+        eq(arrayBeingsorted[1], String(2));
+        eq(arrayBeingsorted[2], String(3));
+        eq(arrayBeingsorted[3], String(4));
+        eq(arrayBeingsorted[4], String(5));
+    },
+    "(9) It should return an descending array when callback(a, b) is comparing b - a or b > a.": function(){
+        var arrayBeingsorted = [2, 4, 1, 5, 3];
+        sort(arrayBeingsorted, function(a, b){
+            return b - a;
+        });
+        eq(arrayBeingsorted[0], String(5));
+        eq(arrayBeingsorted[1], String(4));
+        eq(arrayBeingsorted[2], String(3));
+        eq(arrayBeingsorted[3], String(2));
+        eq(arrayBeingsorted[4], String(1));
+
+        sort(arrayBeingsorted, function(a, b){
+            return b > a;
+        });
+        eq(arrayBeingsorted[0], String(5));
+        eq(arrayBeingsorted[1], String(4));
+        eq(arrayBeingsorted[2], String(3));
+        eq(arrayBeingsorted[3], String(2));
+        eq(arrayBeingsorted[4], String(1));
+    },
+    "(10) It should work on objects.": function(){
+        var objectBeingsorted = [
+            { name: 'cherry', value: 11 },
+            { name: 'apple', value: 37 },
+            { name: 'banana', value: 5 }
+        ];
+
+        // sort by name
+        sort(objectBeingsorted, (a, b) => a.name > b.name);
+        eq(JSON.stringify(objectBeingsorted[0]), '{"name":"apple","value":37}');
+        eq(JSON.stringify(objectBeingsorted[1]), '{"name":"banana","value":5}');
+        eq(JSON.stringify(objectBeingsorted[2]), '{"name":"cherry","value":11}');
+
+        // sort by value
+        sort(objectBeingsorted, (a, b) => a.value - b.value);
+        eq(JSON.stringify(objectBeingsorted[0]), '{"name":"banana","value":5}');
+        eq(JSON.stringify(objectBeingsorted[1]), '{"name":"cherry","value":11}');
+        eq(JSON.stringify(objectBeingsorted[2]), '{"name":"apple","value":37}');
+    }
+});
+
+</script>

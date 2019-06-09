@@ -1,0 +1,85 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function shift(array){
+//     var shiftResult = array[0];
+
+//     if(array.length === 0){
+//         return undefined;
+//     }
+//     // remove the first element, can't replace with arrayLength
+//     for(var i = 1; i < array.length; i++){
+//         array[i - 1] = array[i];
+//     }
+//     array.length--;
+
+//     return shiftResult;
+// }
+
+// Function signature:
+//  function shift(array)
+
+// callback parameters:
+
+// Return value:
+//  It should remove the first element from an array.
+//  It should return the removed element.
+
+
+function shift(array){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var shiftResult = array[0];
+
+    if(array.length === 0){
+        return undefined;
+    }
+
+    // remove the first element:
+    // step 1: move all element one slot forward
+    for(var i = 0; i < arrayLength; i++){
+        array[i] = array[i + 1];
+    }
+    // step 2: remove the last element (can't replace with arrayLength)
+    array.length--;
+
+    return shiftResult;
+}
+
+tests({
+    "(1) It should return the removed element.": function() {
+        var shiftResult = shift([111, 222, 333]);
+        eq(shiftResult, 111);
+    },
+    "(2) It should remove the first element from an array.": function() {
+        var arrayBeingshifted = ['a', 'b', 'c'];
+        var shiftResult = shift(arrayBeingshifted);
+        eq(shiftResult, 'a');
+        eq(arrayBeingshifted[0], 'b');
+        eq(arrayBeingshifted[1], 'c');
+    },
+    "(3) It should subtract 1 from array length after pop().": function() {
+        var arrayBeingshifted = ['a', 'b', 'c'];
+        shift(arrayBeingshifted);
+        eq(arrayBeingshifted.length, 2);
+    },
+    "(4) It should return undefined when empty array.": function() {
+        var arrayBeingshifted = [];
+        var shiftResult = shift(arrayBeingshifted);
+        eq(shiftResult, undefined);
+    },
+    "(5) It should work on array-like object.": function() {
+        var arrayLikeBeingShifted = {
+            0: 'puffin',
+            1: 'magpie',
+            2: 'robin',
+            length: 3,
+        }
+        var shiftResult = shift(arrayLikeBeingShifted);
+        eq(shiftResult, 'puffin');
+        eq(arrayLikeBeingShifted.length === 2, true);
+    }
+});
+
+</script>

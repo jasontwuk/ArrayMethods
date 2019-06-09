@@ -1,0 +1,101 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function lastIndexOf(array, searchElement, fromIndex){
+//     var arrayLength = array.length;
+//     for(var i = arrayLength - 1 ; i > -1; i--){
+//         if(array[i] === searchElement){
+//             return i;
+//         }
+//     }
+//     return -1;
+// }
+
+// Function signature:
+//  function lastIndexOf(searchElement [, fromIndex])
+
+// callback parameters:
+
+// Return value:
+//  Return the 'last index of a given element' in the array.
+//  If not present, return -1.
+
+
+function lastIndexOf(array, searchElement, fromIndex){
+    
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var startingIndex = arrayLength - 1;
+
+    // no element in array
+    if(arrayLength === 0 ){
+        return -1;
+    }
+
+    // has fromIndex
+    if(arguments.length > 2){
+        
+        // calculated index (array length + fromIndex) less than 0
+        if(arrayLength + fromIndex < 0){
+            return -1;
+        }
+        // has fromIndex => startingIndex equal to fromIndex
+        // fromIndex < 0 => startingIndex equal to arrayLength plus fromIndex
+        startingIndex = fromIndex < 0 ? arrayLength + fromIndex : fromIndex;
+
+        // fromIndex equal or greater than array length, start the array from the last element
+        // this can prevent unnecessary loop
+        if(fromIndex >= arrayLength){
+            startingIndex = arrayLength - 1;
+        }
+    }
+
+    for(var i = startingIndex; i > -1; i--){
+        if(array[i] === searchElement){
+            return i;
+        }
+    }
+    return -1;
+}
+
+tests({
+    "(1) It should stop the loop and return the index when it find a true value, when no fromIndex.": function() {
+        var lastIndexOfResult = lastIndexOf([1, 2, 3, 1, 2, 3], 1);
+        eq(lastIndexOfResult, 3);
+    },
+    "(2) It should stop the loop and return the index when it find a true value, when has fromIndex.": function(){
+        var lastIndexOfResult = lastIndexOf([1, 2, 3, 1, 2, 3], 1, 2);
+        eq(lastIndexOfResult, 0);
+    },
+    '(3) It should return "-1" when no true value.': function(){
+        var lastIndexOfResult = lastIndexOf([, 1, , 2, 3], 5);
+        eq(lastIndexOfResult, -1);
+    },
+    '(4) It should return "-1" when array is empty.': function(){
+        var lastIndexOfResult = lastIndexOf([], 1);
+        eq(lastIndexOfResult, -1);
+    },
+    '(5) It should return "-1" when calculated index (array length + fromIndex) less than 0': function(){
+        var lastIndexOfResult = lastIndexOf([1, 2, 3], 1, -5);
+        eq(lastIndexOfResult, -1);
+    },
+    '(6) It should offset from the end of the array when fromIndex is negative.': function(){
+        var lastIndexOfResult = lastIndexOf([1, 2, 3, 1, 2, 3], 1, -3);
+        eq(lastIndexOfResult, 3);
+    },
+    "(7) It should search from back to front, even if the fromIndex is negative.": function(){
+        var lastIndexOfResult = lastIndexOf(['a', 'b', 'c', 'a', 'b', 'c'], 'a', 5);
+        eq(lastIndexOfResult, 3);
+    },
+    '(8) It should search the whole array when fromIndex is [array length - 1].': function(){
+        var lastIndexOfResult = lastIndexOf([1, 2, 3], 1, 2);
+        eq(lastIndexOfResult, 0);
+    },
+    '(9) It should search the whole array when fromIndex equal or greater than array length.': function(){
+        var lastIndexOfResult = lastIndexOf([1, 2, 3], 1, 10);
+        eq(lastIndexOfResult, 0);
+    }
+});
+
+</script>

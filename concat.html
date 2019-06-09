@@ -1,0 +1,138 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+//  function concat(array, value1){
+//     var resultSoFar = array;
+
+//     for(var i = 0; i < value1.length; i++){
+//         resultSoFar = array.push(value1[i]);
+//     };
+    
+//     return resultSoFar;
+//  }
+
+// Function signature:
+//  function concat(array, [value1[, value2[, ...[valueN]]]])
+
+// callback parameters:
+
+// Return value:
+//  Return a new array from merge two or more arrays.
+
+
+function concat(array, argument1, argumentN){
+    var resultSoFar = [];
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+
+    // add old array to new array
+    for(var x = 0; x < arrayLength; x++){
+       resultSoFar.push(array[x]);
+    };
+
+    // when more than one or more arguments are provided
+    if(arguments.length > 1){
+        var argumentsLength = arguments.length;
+
+        // loop through all arguments from arguments[1]
+        // arguments[0] is array
+        for(var idx = 1; idx < argumentsLength; idx++){
+            // arguments[idx] is an array
+            if(Array.isArray(arguments[idx])){
+                for(var i = 0; i < arguments[idx].length; i++){
+                    resultSoFar.push(arguments[idx][i]);
+                };
+            // arguments[idx] not an array
+            } else {
+                resultSoFar.push(arguments[idx]);
+            }
+        }
+    }
+    return resultSoFar;
+}
+
+
+tests({
+    '(1) If should return a new array, when the argument is an array.': function(){
+        var concatResult = concat([1, 2, 3], ['a', 'b', 'c']);
+        eq(Array.isArray(concatResult), true);
+        eq(concatResult[0], 1);
+        eq(concatResult[1], 2);
+        eq(concatResult[2], 3);
+        eq(concatResult[3], 'a');
+        eq(concatResult[4], 'b');
+        eq(concatResult[5], 'c');
+    },
+    '(2) If should return a new array, when the argument is element.': function(){
+        var concatResult = concat([1, 2, 3], 'a-z');
+        eq(Array.isArray(concatResult), true);
+        eq(concatResult[0], 1);
+        eq(concatResult[1], 2);
+        eq(concatResult[2], 3);
+        eq(concatResult[3], 'a-z');
+    },
+    '(3) If should return a new array, when more than two arguments.': function(){
+        var concatResult = concat([1, 2, 3], '+-x/', ['a', 'z']);
+        eq(Array.isArray(concatResult), true);
+        eq(concatResult[0], 1);
+        eq(concatResult[1], 2);
+        eq(concatResult[2], 3);
+        eq(concatResult[3], '+-x/');
+        eq(concatResult[4], 'a');
+        eq(concatResult[5], 'z');
+    },
+    '(4) It should return a shallow copy of the original array if no valueN.': function(){
+        var arrayBeingConcated = [1, 2, 3];
+        var concatResult = concat(arrayBeingConcated);
+        eq(concatResult[0], 1);
+        eq(concatResult[1], 2);
+        eq(concatResult[2], 3);
+        eq(concatResult.length, 3);
+        eq(concatResult !== arrayBeingConcated, true);
+    },
+    '(5) It should not change the original array.': function(){
+        var arrayBeingConcated = [1, 2, 3];
+        var concatResult = concat(arrayBeingConcated, ['a', 'b', 'c']);
+        eq(arrayBeingConcated[0], 1);
+        eq(arrayBeingConcated[1], 2);
+        eq(arrayBeingConcated[2], 3);
+        eq(arrayBeingConcated.length, 3);
+    },
+    "(6) It should not change argument's order.": function(){
+        var concatResult = concat([3, 2, 1], ['z', 'y', 'x']);
+        eq(concatResult[0], 3);
+        eq(concatResult[1], 2);
+        eq(concatResult[2], 1);
+        eq(concatResult[3], 'z');
+        eq(concatResult[4], 'y');
+        eq(concatResult[5], 'x');
+    },
+    '(7) It should copy object references into the new array.': function(){
+        var arrayBeingConcated = [[1, 2, 3]];
+        var concatResult = concat(arrayBeingConcated, [['z', 'y', 'x']]);
+        arrayBeingConcated[0].push(99);
+        eq(concatResult[0][0], 1);
+        eq(concatResult[0][1], 2);
+        eq(concatResult[0][2], 3);
+        eq(concatResult[0][3], 99);
+        eq(concatResult[1][0], 'z');
+        eq(concatResult[1][1], 'y');
+        eq(concatResult[1][2], 'x');
+        eq(concatResult.length, 2);
+        eq(Array.isArray(concatResult[0]), true);
+        eq(Array.isArray(concatResult[1]), true);
+    },
+    '(8) It should copy the values of strings and numbers into the new array.': function(){
+        var concatResult = concat([1, 2, 3], ['string', 100, true]);
+        eq(concatResult[0], 1);
+        eq(concatResult[1], 2);
+        eq(concatResult[2], 3);
+        eq(concatResult[3], 'string');
+        eq(concatResult[4], '100');
+        eq(concatResult[5], true);
+        eq(concatResult.length, 6);
+    }
+});
+
+</script>

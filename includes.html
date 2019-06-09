@@ -1,0 +1,84 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function includes(array, valueToFind, fromIndex){
+//     var arrayLength = array.length;
+//     for(var i = 0 ; i < arrayLength; i++){
+//         if(array[i] === valueToFind){
+//             return true;
+//         }
+//     }
+//     return false;
+// }
+
+// Function signature:
+//  function includes(array, valueToFind [, fromIndex])
+
+// callback parameters:
+
+// Return value:
+//  Return true when a certain value is in the array.
+//  Otherwise, return false.
+
+
+function includes(array, valueToFind, fromIndex){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var startingIndex = 0;
+
+    if(arguments.length > 2){
+        startingIndex = fromIndex < 0 ? arrayLength + fromIndex : fromIndex;
+        // prevent unnecessary loop
+        startingIndex = startingIndex < 0 ? 0 : startingIndex;
+    }
+
+    for(var i = startingIndex ; i < arrayLength; i++){
+        // Object.is() can make sure NaN passes the test
+        if(array[i] === valueToFind||Object.is(array[i], valueToFind)){
+            return true;
+        }
+    }
+    return false;
+}
+
+tests({
+    "(1) It should return 'true' when a certain value is in the array.": function() {
+        var includesResult = includes([1, 2, 3], 1);
+        eq(includesResult, true);
+    },
+    "(2) It should return 'false' when no certain value in the array.": function(){
+        var includesResult = includes([1, 2, 3], 5);
+        eq(includesResult, false);
+    },
+    '(3) It should be case-sensitive.': function(){
+        var includesResult = includes(['a'], 'A');
+        eq(includesResult, false);
+    },
+    '(4) It should start from fromIndex when fromIndex is positive.': function(){
+        var includesResult = includes([1, 2, 3, 1, 2, 3], 1, 4);
+        eq(includesResult, false);
+    },
+    '(5) It should start from [array.length + fromIndex] when fromIndex is negative': function(){
+        var includesResult = includes([1, 2, 3, 1, 2, 3], 1, -4);
+        eq(includesResult, true);
+    },
+    '(6) It should have the same value for 0, +0 and -0.': function(){
+        var includesResult1 = includes([+0], 0);
+        eq(includesResult1, true);
+        var includesResult2 = includes([-0], 0);
+        eq(includesResult2, true);
+        var includesResult3 = includes([-0], +0);
+        eq(includesResult3, true);
+    },
+    "(7) It should be different for false and 0.": function(){
+        var includesResult = includes([0], false);
+        eq(includesResult, false);
+    },
+    "(8) It should be the same for NaN.": function(){
+        var includesResult = includes([1, 2, NaN], NaN);
+        eq(includesResult, true);
+    }
+});
+
+</script>

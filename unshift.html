@@ -1,0 +1,125 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function unshift(array, argument1){
+    
+//     var arrayLength = array.length;
+
+//     for(var x = arrayLength - 1; x > -1; x--){
+//         array[x + arguments.length - 1] = array[x];
+//     }
+    
+//     for(var i = 0; i < arguments.length -1; i++){
+//         array[i] = arguments[i + 1];
+//     }
+    
+//     return array.length;
+// }
+
+// Function signature:
+//  function unshift(array, element1[, ...[, elementN]])
+
+// callback parameters:
+
+// Return value:
+//  It should add one or more elements to the beginning of an array.
+//  It should return the new length of the array.
+
+
+function unshift(array, argument1){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var argumentsLength = arguments.length;
+
+    // throw an error when the first argument is not an array
+    if(Array.isArray(array) !== true){
+        throw new Error(array + '.unshift is not a function');
+    }
+
+    // set the array's element backward
+    for(var x = arrayLength - 1; x > -1; x--){
+        array[x + argumentsLength - 1] = array[x];
+    }
+    
+    // replace array's front elements with argumentN
+    for(var i = 0; i < argumentsLength -1; i++){
+        array[i] = arguments[i + 1];
+    }
+    
+    return array.length;
+}
+
+tests({
+    "(1) It should return the new length of the array.": function() {
+        var arrayBeingUnshifted = [2, 3];
+        var unshiftResult = unshift(arrayBeingUnshifted, 1);
+        eq(unshiftResult, 3);
+        eq(arrayBeingUnshifted[0], 1);
+        eq(arrayBeingUnshifted[1], 2);
+        eq(arrayBeingUnshifted[2], 3);
+    },
+    "(2) It should add one or more elements to the beginning of an array.": function() {
+        var arrayBeingUnshifted = ['c'];
+        var unshiftResult = unshift(arrayBeingUnshifted, 'a', 'b');
+        eq(unshiftResult, 3);
+        eq(arrayBeingUnshifted[0], 'a');
+        eq(arrayBeingUnshifted[1], 'b');
+        eq(arrayBeingUnshifted[2], 'c');
+    },
+    "(3) It should keep the argument's reference.": function() {
+        var arrayBeingUnshifted = [999];
+        var arrayToUnshift = ["a", "z"];
+        var unshiftResult = unshift(arrayBeingUnshifted, arrayToUnshift);
+        eq(unshiftResult === 2, true);
+        eq(arrayBeingUnshifted[0], arrayToUnshift);
+        eq(arrayBeingUnshifted[1], 999);
+    },
+    "(4) It should return the original array when no elements.": function() {
+        var arrayBeingUnshifted = [1, 2, 3];
+        var unshiftResult = unshift(arrayBeingUnshifted);
+        eq(unshiftResult, 3);
+        eq(arrayBeingUnshifted[0], 1);
+        eq(arrayBeingUnshifted[1], 2);
+        eq(arrayBeingUnshifted[2], 3);
+    },
+    "(5) It should throw an error when the first argument is not an array.": function() {
+        var isError1 = false;
+        try {
+            // string
+            unshift("This is a string");
+        } catch (e) {
+            isError1 = e instanceof Error;
+        }
+        eq(isError1, true);
+
+        var isError2 = false;
+        try {
+            // boolean
+            unshift(true);
+        } catch (e) {
+            isError2 = e instanceof Error;
+        }
+        eq(isError2, true);
+
+        var isError3 = false;
+        try {
+            // number
+            unshift(999);
+        } catch (e) {
+            isError3 = e instanceof Error;
+        }
+        eq(isError3, true);
+
+        var isError4 = false;
+        try {
+            // object
+            unshift({name: 'Apple', number: 3, color: 'red'});
+        } catch (e) {
+            isError4 = e instanceof Error;
+        }
+        eq(isError4, true);
+    }
+});
+
+</script>

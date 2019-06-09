@@ -1,0 +1,143 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+
+// Function signature:
+//  function every(array, callback[, optionalThisObject])
+
+// callback parameters:
+//  currentValue 
+//  currentIndex
+//  array
+
+// Return value:
+//  Return the true when every array element has a truthy value.
+//  Otherwise return false.
+
+function every(array, callback, optionalThisObject){
+    
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+
+    callback = optionalThisObject ? callback.bind(optionalThisObject) : callback;
+
+    for(var i = 0; i < arrayLength; i++){
+        if(i in array){
+            if(!callback(array[i], i, array)){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+tests({
+    '(1) It should pass the ith element as the first argument to the callback.': function() {
+        every([1], function(currentValue){
+            eq(currentValue, 1);
+        });
+    },
+    '(2) It should pass in the ith position as the second argument to the callback.': function(){
+        every([1], function(currentValue, currentIndex){
+            eq(currentIndex, 0);
+        });
+    },
+    '(3) It should pass in the original array as the third argument to the callback.': function(){
+        var arrayBeingEveryed = [1, 2, 3];
+        every(arrayBeingEveryed, function(currentValue, currentIndex, originalArray){
+            eq(originalArray, arrayBeingEveryed);
+        });
+    },
+    '(4) It should accept an optional this object.': function(){
+        every([1], function(currentValue, currentIndex, originalArray){
+            eq(this.description, 'I should be accessible inside of the callback.');
+        }, {description: 'I should be accessible inside of the callback.'});
+    },
+    '(5) It should run the callback function array.length time when all element has truthy value.': function() {
+        var callbackRunCount = 0;
+        var everyResult = every([1, 2, 3], function(currentValue){
+            callbackRunCount++;
+            return currentValue > 0;
+        });
+        eq(callbackRunCount, 3);
+        eq(everyResult, true);
+    },
+    '(6) It should stop the loop and return "false" when it find a falsy value.': function(){
+        var everyResult = every([-1, 1, 2, 3], function(currentValue){
+            return currentValue > 0;
+        });
+        eq(everyResult, false);
+    },
+    '(7) It should return "true" when every element has a truthy value.': function(){
+        var everyResult = every([1, 2, 3], function(currentValue){
+            return currentValue > 0;
+        });
+        eq(everyResult, true);
+    },
+    '(8) It should return "true" when array is empty.': function(){
+        var everyResult = every([], function(currentValue){
+            return currentValue > 5;
+        });
+        eq(everyResult, true);
+    },
+    '(9) It should skip holes.': function(){
+        var callbackRunCount = 0;
+        var everyResult = every([, 1, , 2, 3], function(currentValue){
+            callbackRunCount++;
+            return currentValue > 0;
+        });
+        eq(callbackRunCount, 3);
+        eq(everyResult, true);
+
+    },
+    '(10) It should skip deleted elements.': function(){
+        var callbackRunCount = 0;
+        var arrayBeingEveryed = [1, 2, 3];
+        var everyResult = every(arrayBeingEveryed, function(currentValue, currentIndex){
+            delete arrayBeingEveryed[2];
+            callbackRunCount++;
+            return currentValue > 0;
+        });
+        eq(callbackRunCount, 2);
+        eq(everyResult, true);
+    },
+    '(11) It should not change the original array': function(){
+        var arrayBeingEveryed = [1, 2, 3];
+        var everyResult = every(arrayBeingEveryed, function(currentValue){
+            return currentValue > 2;
+        });
+        eq(arrayBeingEveryed.length, 3);
+        eq(arrayBeingEveryed[0], 1);
+        eq(arrayBeingEveryed[1], 2);
+        eq(arrayBeingEveryed[2], 3);
+        eq(everyResult, false);
+    },
+    "(12) It should not visit the element's that are appended to the array after every() begins.": function(){
+        var arrayBeingEveryed = [1, 2, 3];
+        var callbackRunCount = 0;
+        var everyResult = every(arrayBeingEveryed, function(currentValue){
+            // append some numbers to the array.
+            arrayBeingEveryed.unshift(8);
+            arrayBeingEveryed.push(7);
+            callbackRunCount++;
+            return currentValue < 5;
+        });
+        eq(callbackRunCount, 3);
+        eq(everyResult, true);
+    },
+    '(13) It should pass the given current value (even it is changed by callback before visit).': function(){
+        var arrayBeingEveryed = [1, -2, -3];
+        var callbackRunCount = 0;
+        var everyResult = every(arrayBeingEveryed, function(currentValue){
+            arrayBeingEveryed[1] = 2;
+            arrayBeingEveryed[2] = 3;
+            callbackRunCount++;
+            return currentValue > 0;
+        });
+        eq(callbackRunCount, 3);
+        eq(everyResult, true);
+    }
+});
+
+</script>

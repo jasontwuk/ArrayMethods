@@ -1,0 +1,177 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function copyWithin(array, target, start, end){
+//     var arrayLength = array.length;
+//     var newArray = [];
+    
+//     target = target < 0 ? arrayLength + target : target;
+//     start = start ? start < 0 ? arrayLength + start : start : 0;
+//     end = end ? end < 0 ? arrayLength + end : end : arrayLength;
+
+//     for(var z = 0; z < arrayLength; z++){
+//         newArray[z] = array [z];
+//     }
+    
+//     for(var x = target, i = start; x < end - start, i < end ; x++, i++){
+//         newArray[x] = array[i];
+//         // delete elements after arrayLength 5
+//         newArray.length = 5;
+//     }
+
+//     // put mutated elements back to array
+//     for(var z = 0; z < arrayLength; z++){
+//         array[z] = newArray[z];
+//     }
+
+//     return array;
+// }
+
+// Function signature:
+//  function copyWithin(array, target[, start[, end]])
+
+// callback parameters:
+
+// Return value:
+//  It should return an array that copies part of the array to another location in the same array.
+//  It should not change the array length.
+
+
+function copyWithin(array, target, start, end){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var newArray = [];
+    
+    target = target < 0 ? arrayLength + target : target;
+    start = start ? start < 0 ? arrayLength + start : start : 0;
+    end = end ? end < 0 ? arrayLength + end : end : arrayLength;
+
+    
+    if (target < arrayLength){
+        // copy array to newArray (so array won't be changed!)
+        for(var z = 0; z < arrayLength; z++){
+            newArray[z] = array [z];
+        }
+        
+        for(var x = target, i = start; x < end - start, i < end ; x++, i++){
+            newArray[x] = array[i];
+            // delete elements after arrayLength 5
+            newArray.length = 5;
+        }
+
+        // put mutated elements back to array
+        for(var z = 0; z < arrayLength; z++){
+            array[z] = newArray[z];
+        }
+    } // if target > arrayLength, just return array
+
+    return array;
+}
+
+tests({
+    "(1) It should return an array that copies part of the array to another location in the same array.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 0, 3, 4);
+        eq(arrayBeingCopyWitnined[0], 4);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    },
+    "(2) It should not change the array length.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 0, 3, 4);
+        eq(arrayBeingCopyWitnined.length, 5);
+    },
+    "(3) It should count from the end when target is negative.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, -5, 3, 4);
+        eq(arrayBeingCopyWitnined[0], 4);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    },
+    "(4) It should return the original array when target is greater than array length.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 10, 3, 4);
+        eq(arrayBeingCopyWitnined[0], 1);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    },
+    "(5) It should trim the copied sequence to fit array length when target is positioned after start.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 3, 0, 6);
+        eq(arrayBeingCopyWitnined[0], 1);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 1);
+        eq(arrayBeingCopyWitnined[4], 2);
+    },
+    "(6) It should count from the end when start is negative.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 0, -2, 4);
+        eq(arrayBeingCopyWitnined[0], 4);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    },
+    "(7) It should start with 0 when no start.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 2);
+        eq(arrayBeingCopyWitnined[0], 1);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 1);
+        eq(arrayBeingCopyWitnined[3], 2);
+        eq(arrayBeingCopyWitnined[4], 3);
+    },
+    "(8) It should count from the end when end is negative.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 0, 3, -1);
+        eq(arrayBeingCopyWitnined[0], 4);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    },
+    "(9) It should copy until the last index when no end.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 0, 3);
+        eq(arrayBeingCopyWitnined[0], 4);
+        eq(arrayBeingCopyWitnined[1], 5);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    },
+    "(10) It should change array's content and create new properties if necessary.": function() {
+        var arrayBeingCopyWitnined = [, 2, 3, 4, 5];
+        eq(arrayBeingCopyWitnined[0] === undefined, true);
+        copyWithin(arrayBeingCopyWitnined, 0, 3, 4);
+        eq(arrayBeingCopyWitnined[0] !== undefined, true);
+        eq(arrayBeingCopyWitnined[0], 4);
+    },
+    "(11) It should return the original array when no target, no start and no end.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined);
+        eq(arrayBeingCopyWitnined[0], 1);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    },
+    "(12) It should return the original array when start > end.": function() {
+        var arrayBeingCopyWitnined = [1, 2, 3, 4, 5];
+        copyWithin(arrayBeingCopyWitnined, 0, 3, 1);
+        eq(arrayBeingCopyWitnined[0], 1);
+        eq(arrayBeingCopyWitnined[1], 2);
+        eq(arrayBeingCopyWitnined[2], 3);
+        eq(arrayBeingCopyWitnined[3], 4);
+        eq(arrayBeingCopyWitnined[4], 5);
+    }
+});
+
+</script>

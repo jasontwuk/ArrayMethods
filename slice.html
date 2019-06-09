@@ -1,0 +1,134 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function slice(array, begin, end){
+//     var arrayLength = array.length;
+//     var startingIndex = begin ? begin : 0;
+//     var endingIndex = end ? end : arrayLength;
+//     var sliceResult = [];
+
+//     for(var x = 0, i = startingIndex; x < endingIndex - startingIndex, i < endingIndex; x++, i++){
+//         sliceResult[x] = array[i];
+//     }
+//     return sliceResult;
+// }
+
+// Function signature:
+//  function slice(array, [begin [, end]])
+
+// callback parameters:
+
+// Return value:
+//  It should return a new array that copys from 'begin' to 'end (not included) from original array.
+
+
+function slice(array, begin, end){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    // has begin >>> begin; no begin >>> 0
+    // begin is negative >>> arrayLength + begin; begin not negative >>> begin
+    var startingIndex = begin ? begin < 0 ? arrayLength + begin : begin : 0;
+    // has end >>> end; no end >>> arrayLength
+    // end is negative >>> arrayLength + end; begin not negative >>> end
+    // end greater than arrayLength >>> arrayLength; end less than arrayLength >>> end
+    var endingIndex = end ? end < 0 ? arrayLength + end : end > arrayLength ? arrayLength : end : arrayLength;
+    var sliceResult = [];
+
+    for(var x = 0, i = startingIndex; x < endingIndex - startingIndex, i < endingIndex; x++, i++){
+        sliceResult[x] = array[i];
+    }
+    return sliceResult;
+}
+
+tests({
+    "(1) It should return a new array that copys from 'begin' to 'end (not included) from original array.": function() {
+        var sliceResult = slice([1, 2, 3, 4, 5, 6], 1, 4);
+        eq(sliceResult.length, 3);
+        eq(sliceResult[0], 2);
+        eq(sliceResult[1], 3);
+        eq(sliceResult[2], 4);
+        eq(Array.isArray(sliceResult), true);
+    },
+    "(2) It should return a shallow copy.": function() {
+        var arrayBeingSliced = [1];
+        var sliceResult = slice(arrayBeingSliced);
+        eq(sliceResult === arrayBeingSliced, false);
+        eq(sliceResult.length, 1);
+        eq(sliceResult[0], 1);
+    },
+    "(3) It should not mutate original array.": function(){
+        var arrayBeingSliced = [1, 2, 3];
+        slice(arrayBeingSliced, 1, 2);
+        eq(arrayBeingSliced.length, 3);
+        eq(arrayBeingSliced[0], 1);
+        eq(arrayBeingSliced[1], 2);
+        eq(arrayBeingSliced[2], 3);
+    },
+    "(4) It should offset from the end of array when 'begin' is negative.": function(){
+        var sliceResult = slice([1, 2, 3, 4, 5, 6], -1);
+        eq(sliceResult.length, 1);
+        eq(sliceResult[0], 6);
+    },
+    "(5) It should start from index 0 when no 'begin'.": function(){
+        var sliceResult = slice([1, 2, 3]);
+        eq(sliceResult.length, 3);
+        eq(sliceResult[0], 1);
+        eq(sliceResult[1], 2);
+        eq(sliceResult[2], 3);
+    },
+    "(6) It should return empty array when 'begin' is greater than array.length.": function(){
+        var sliceResult = slice([1, 2, 3, 4, 5, 6], 7);
+        eq(sliceResult.length, 0);
+    },
+    "(7) It should not include element at the 'end' index, stop at [end - 1].": function(){
+        var sliceResult = slice([1, 2, 3], 1, 2);
+        eq(sliceResult.length, 1);
+        eq(sliceResult[0], 2);
+    },
+    "(8) It should offset from the end of array when 'end' is negative.": function(){
+        var sliceResult = slice([1, 2, 3, 4, 5, 6], 1, -1);
+        eq(sliceResult.length, 4);
+        eq(sliceResult[0], 2);
+        eq(sliceResult[1], 3);
+        eq(sliceResult[2], 4);
+        eq(sliceResult[3], 5);
+    },
+    "(9) It should run through to the end of array when no 'end'.": function(){
+        var sliceResult = slice([1, 2, 3, 4, 5, 6], 1);
+        eq(sliceResult.length, 5);
+        eq(sliceResult[0], 2);
+        eq(sliceResult[1], 3);
+        eq(sliceResult[2], 4);
+        eq(sliceResult[3], 5);
+        eq(sliceResult[4], 6);
+    },
+    "(10) It should run through to the end of array when 'end' is greater than array.length.": function(){
+        var sliceResult = slice([1, 2, 3], 0, 5);
+        eq(sliceResult.length, 3);
+        eq(sliceResult[0], 1);
+        eq(sliceResult[1], 2);
+        eq(sliceResult[2], 3);
+    },
+    "(11) It should copy object references into the new array.": function(){
+        var numberArray = [1, 2, 3];
+        var newNumberArray = [numberArray, 4, 5, 6];
+        var sliceResult = slice(newNumberArray, 0, 2);
+        eq(sliceResult.length, 2);
+        eq(sliceResult[0], numberArray);
+        eq(sliceResult[1], 4);
+
+        numberArray[0] = 100;
+        eq(sliceResult[0][0], 100);
+    },
+    "(12) It should copy the values of strings, numbers and booleans into the new array.": function(){
+        var sliceResult = slice(['first', 2, true, false]);
+        eq(sliceResult.length, 4);
+        eq(sliceResult[0], 'first');
+        eq(sliceResult[1], 2);
+        eq(sliceResult[2], true);
+        eq(sliceResult[3], false);
+    }
+});
+
+</script>

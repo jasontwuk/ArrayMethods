@@ -1,0 +1,129 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+
+
+// Function signature:
+//  function some(array, callback[, optionalThisObject])
+
+// callback parameters:
+//  currentValue 
+//  currentIndex
+//  array
+
+// Return value:
+//  Return the true when at least one array element has a truthy value.
+//  Otherwise return false.
+
+
+function some(array, callback, optionalThisObject){
+    
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+
+    callback = optionalThisObject ? callback.bind(optionalThisObject) : callback;
+
+    for(var i = 0; i < arrayLength; i++){
+        if(i in array){
+            if(callback(array[i], i, array)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+tests({
+    '(1) It should pass the ith element as the first argument to the callback.': function() {
+        some([1], function(currentValue){
+            eq(currentValue, 1);
+        });
+    },
+    '(2) It should pass in the ith position as the second argument to the callback.': function(){
+        some([1], function(currentValue, currentIndex){
+            eq(currentIndex, 0);
+        });
+    },
+    '(3) It should pass in the original array as the third argument to the callback.': function(){
+        var arrayBeingSomed = [1, 2, 3];
+        some(arrayBeingSomed, function(currentValue, currentIndex, originalArray){
+            eq(originalArray, arrayBeingSomed);
+        });
+    },
+    '(4) It should accept an optional this object.': function(){
+        some([1], function(currentValue, currentIndex, originalArray){
+            eq(this.description, 'I should be accessible inside of the callback.');
+        }, {description: 'I should be accessible inside of the callback.'});
+    },
+    '(5) It should stop the loop and return "true" when it find a truthy value.': function(){
+        var callbackRunCount = 0;
+        var someResult = some([-1, 1, 2, 3], function(currentValue){
+            callbackRunCount++;
+            return currentValue > 0;
+        });
+        eq(callbackRunCount, 2);
+        eq(someResult, true);
+    },
+    '(6) It should return "false" when every element has a falsy value.': function(){
+        var someResult = some([1, 2, 3], function(currentValue){
+            return currentValue < 0;
+        });
+        eq(someResult, false);
+    },
+    '(7) It should skip holes.': function(){
+        var callbackRunCount = 0;
+        var someResult = some([, 1, , 2, 3], function(currentValue){
+            callbackRunCount++;
+            return currentValue > 0;
+        });
+        eq(callbackRunCount, 1);
+        eq(someResult, true);
+
+    },
+    '(8) It should skip deleted elements.': function(){
+        var callbackRunCount = 0;
+        var arrayBeingSomed = [5, 15, 10];
+        var someResult = some(arrayBeingSomed, function(currentValue, currentIndex){
+            delete arrayBeingSomed[1];
+            callbackRunCount++;
+            return currentValue > 10;
+        });
+        eq(callbackRunCount, 2);
+        eq(someResult, false);
+    },
+    '(9) It should not change the original array': function(){
+        var arrayBeingSomed = [1, 2, 3];
+        var someResult = some(arrayBeingSomed, function(currentValue){
+            return currentValue > 5;
+        });
+        eq(arrayBeingSomed.length, 3);
+        eq(arrayBeingSomed[0], 1);
+        eq(arrayBeingSomed[1], 2);
+        eq(arrayBeingSomed[2], 3);
+        eq(someResult, false);
+    },
+    "(10) It should not visit the element's that are appended to the array after some() begins.": function(){
+        var arrayBeingSomed = [1, 2, 3];
+        var callbackRunCount = 0;
+        var someResult = some(arrayBeingSomed, function(currentValue, currentIndex){
+            callbackRunCount++;
+            // append some numbers to the array.
+            arrayBeingSomed.unshift(8);
+            arrayBeingSomed.push(7);
+            return currentValue > 5;
+        });
+        eq(callbackRunCount, 3);
+        eq(someResult, false);
+    },
+    '(11) It should pass the given current value (even it is changed by callback before visit).': function(){
+        var arrayBeingSomed = [1, 2, 3];
+        var someResult = some(arrayBeingSomed, function(currentValue, currentIndex){
+            arrayBeingSomed[2] = 30;
+            return currentValue > 10;
+        });
+        eq(someResult, true);
+    }
+});
+
+</script>

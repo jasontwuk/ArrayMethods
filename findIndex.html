@@ -1,0 +1,133 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function findIndex(array, callback, optionalThisObject){
+//     for(var i = 0; i < array.length; i++){
+//         if(callback(array[i], i, array)){
+//             return i;
+//         }
+//     }
+//     return -1;
+// }
+
+// Function signature:
+//  function findIndex(array, callback[, optionalThisObject])
+
+// callback parameters:
+//  currentValue 
+//  currentIndex
+//  array
+
+// Return value:
+//  Return the 'index of the first element' in the array that satisfies the callback function.
+//  If no true value or array is empty, return -1.
+
+
+function findIndex(array, callback, optionalThisObject){
+
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    
+    callback = optionalThisObject ? callback.bind(optionalThisObject) : callback;
+
+    for(var i = 0; i < arrayLength; i++){
+        if(callback(array[i], i, array)){
+            return i;
+        }
+    }
+    return -1;
+}
+
+tests({
+    '(1) It should pass the ith element as the first argument to the callback.': function() {
+        findIndex([1], function(currentValue){
+            eq(currentValue, 1);
+        });
+    },
+    '(2) It should pass in the ith position as the second argument to the callback.': function(){
+        findIndex([1], function(currentValue, currentIndex){
+            eq(currentIndex, 0);
+        });
+    },
+    '(3) It should pass in the original array as the third argument to the callback.': function(){
+        var arrayBeingFindIndexed = [1, 2, 3];
+        findIndex(arrayBeingFindIndexed, function(currentValue, currentIndex, originalArray){
+            eq(originalArray, arrayBeingFindIndexed);
+        });
+    },
+    '(4) It should accept an optional this object.': function(){
+        findIndex([1], function(currentValue, currentIndex, originalArray){
+            eq(this.description, 'I should be accessible inside of the callback.');
+        }, {description: 'I should be accessible inside of the callback.'});
+    },
+    '(5) It should stop the loop and return the index when it find a true value.': function(){
+        var findIndexResult = findIndex([, 1, , 2, 3], function(currentValue){
+            return currentValue > 1;
+        });
+        eq(findIndexResult, 3);
+    },
+    '(6) It should return "-1" when no true value.': function(){
+        var findIndexResult = findIndex([, 1, , 2, 3], function(currentValue){
+            return currentValue > 5;
+        });
+        eq(findIndexResult, -1);
+    },
+    '(7) It should return "-1" when array is empty.': function(){
+        var findIndexResult = findIndex([], function(currentValue){
+            return currentValue > 5;
+        });
+        eq(findIndexResult, -1);
+    },
+    '(8) It should not exclude holes.': function(){
+        var callbackRunCount = 0;
+        findIndex([, 1, , 2, 3], function(){
+            callbackRunCount++;
+        });
+        eq(callbackRunCount, 5);
+    },
+    '(9) It should not change the original array.': function(){
+        var arrayBeingFindIndexed = [1, 2, 3];
+        findIndex(arrayBeingFindIndexed, function(currentValue){
+            return currentValue > 1;
+        });
+        eq(arrayBeingFindIndexed.length, 3);
+        eq(arrayBeingFindIndexed[0], 1);
+        eq(arrayBeingFindIndexed[1], 2);
+        eq(arrayBeingFindIndexed[2], 3);
+    },
+    "(10) It should not visit the element's that are appended to the array after findIndex() begins.": function(){
+        var arrayBeingFindIndexed = [1, 2, 3];
+        var callbackRunCount = 0;
+        var findIndexResult = findIndex(arrayBeingFindIndexed, function(currentValue, currentIndex){
+            callbackRunCount++;
+            // append some numbers to the array.
+            arrayBeingFindIndexed.unshift(8);
+            arrayBeingFindIndexed.push(7);
+            return currentValue > 5;
+        });
+        
+        eq(callbackRunCount, 3);
+        eq(findIndexResult, -1);
+    },
+    '(11) It should pass the given current value (even it is changed by callback before visit).': function(){
+        var arrayBeingFindIndexed = [1, 2, 3];
+        var findIndexResult = findIndex(arrayBeingFindIndexed, function(currentValue, currentIndex){
+            arrayBeingFindIndexed[1] = 20;
+            arrayBeingFindIndexed[2] = 30;
+            return currentValue > 10;
+        });
+        eq(findIndexResult, 1);
+    },
+    '(12) It should still visit deleted elements.': function(){
+        var callbackRunCount = 0;
+        var arrayBeingFindIndexed = [1, 2, 3];
+        findIndex(arrayBeingFindIndexed, function(currentValue, currentIndex){
+            delete arrayBeingFindIndexed[0];
+            callbackRunCount++;
+        });
+        eq(callbackRunCount, 3);
+    }
+});
+
+</script>

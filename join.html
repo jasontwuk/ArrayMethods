@@ -1,0 +1,100 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function join(array, separator){
+//     var arrayLength = array.length;
+//     var joinResult = '';
+
+//     separator = separator ? separator : ',';
+
+//     for(var i = 0 ; i < arrayLength; i++){
+//         if(i < arrayLength - 1){
+//             joinResult = joinResult + array[i] + separator;
+//         } else {
+//             joinResult = joinResult + array[i];
+//         }
+        
+//     }
+//     return joinResult;
+// }
+
+// Function signature:
+//  function join(array, [separator])
+
+// callback parameters:
+
+// Return value:
+//  It should return a string with all array elements joined and separate by commas or a specified separator string.
+
+
+function join(array, separator){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var joinResult = '';
+
+    // has separator & not empty string >>> separator(turn to string for test.6 null)
+    // no separator >>> ','
+    // has separator & separator is empty string >>> ''
+    if(arguments.length > 1){
+        separator = String(separator);
+    } else {
+        separator = ',';
+    }
+    if(separator.length === 0){
+        separator = '';
+    }
+    
+    // has only one item in array
+    if(arrayLength === 1){
+        joinResult = array[0];
+        return joinResult;
+    }
+
+    for(var i = 0 ; i < arrayLength; i++){
+        // set undefined and null to empty string
+        array[i] = array[i] === undefined || array[i] === null ? '' : array[i];
+        
+        if(i < arrayLength - 1){
+            joinResult = joinResult + array[i] + separator;
+        // no separator after the last element
+        } else {
+            joinResult = joinResult + array[i];
+        }
+        
+    }
+    return joinResult;
+}
+
+tests({
+    "(1) It should return a string with all array elements joined and separate by commas or a specified separator string.": function() {
+        var joinResult1 = join([1, 2, 3]);
+        eq(joinResult1, '1,2,3');
+        var joinResult2 = join([1, 2, 3], '-');
+        eq(joinResult2, '1-2-3');
+        var joinResult2 = join([1, 2, 3], ' ');
+        eq(joinResult2, '1 2 3');
+    },
+    "(2) It should join items when the separator is an empty string.": function() {
+        var joinResult = join(['a', 'b', 'c'], '');
+        eq(joinResult, 'abc');
+    },
+    "(3) It should return the item without using the separator when only one item.": function(){
+        var joinResult = join(['a'], '&');
+        eq(joinResult, 'a');
+    },
+    "(4) It should return a empty string when arr.length is 0.": function(){
+        var joinResult = join([], '+');
+        eq(joinResult, '');
+    },
+    "(5) It should convert to empty string when an element is 'undefined' or 'null'.": function(){
+        var joinResult = join(['1', undefined, '2', null, '3'], '*');
+        eq(joinResult, '1**2**3');
+    },
+    '(6) If should be used as a string when null is passed in as separator': function() {
+        var joinResult = join([1, 2, 3], null);
+        eq(joinResult, '1null2null3');
+    }
+});
+
+</script>

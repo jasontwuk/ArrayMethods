@@ -1,0 +1,72 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function pop(array){
+//     var arrayLength = array.length;
+//     var lastArray = array[arrayLength - 1];
+    
+//     array.length--;
+
+//     return lastArray;
+// }
+
+// Function signature:
+//  function pop(array)
+
+// callback parameters:
+
+// Return value:
+//  It should remove the last element from an array.
+//  It should return the removed element.
+
+
+function pop(array){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var lastArray = array[arrayLength - 1];
+
+    if(arrayLength === 0){
+        return undefined;
+    }
+    
+    // remove the last element (can't replace with arrayLength)
+    array.length--;
+
+    return lastArray;
+}
+
+tests({
+    "(1) It should return the removed element.": function() {
+        var popResult = pop([111, 222, 333]);
+        eq(popResult, 333);
+    },
+    "(2) It should remove the last element from an array.": function() {
+        var arrayBeingPopped = ['a', 'b', 'c'];
+        pop(arrayBeingPopped);
+        eq(2 in arrayBeingPopped, false);
+    },
+    "(3) It should subtract 1 from array length after pop().": function() {
+        var arrayBeingPopped = ['a', 'b', 'c'];
+        pop(arrayBeingPopped);
+        eq(arrayBeingPopped.length, 2);
+    },
+    "(4) It should return undefined when empty array.": function() {
+        var arrayBeingPopped = [];
+        var popResult = pop(arrayBeingPopped);
+        eq(popResult, undefined);
+    },
+    "(5) It should work on array-like object.": function() {
+        var arrayLikeBeingPopped = {
+            0: 'puffin',
+            1: 'magpie',
+            2: 'robin',
+            length: 3,
+        }
+        var popResult = pop(arrayLikeBeingPopped);
+        eq(popResult, 'robin');
+        eq(arrayLikeBeingPopped.length === 2, true);
+    }
+});
+
+</script>

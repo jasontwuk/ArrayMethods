@@ -1,0 +1,96 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function push(array, argument1){
+//     for(var i = 1 ; i < arguments.length; i++){
+//         array[array.length] = arguments[i];
+//     }
+//     return array.length;
+// }
+
+// Function signature:
+//  function push(array, element1[, ...[, elementN]])
+
+// callback parameters:
+
+// Return value:
+//  It should returns a value of the new length of the array.
+//  It should adds one or more elements to the end of an array.
+
+
+function push(array, argument1){
+    // throw an error when the first argument is not an array
+    if (Array.isArray(array) !== true) {
+        throw new Error(array + '.push is not a function');
+    }
+
+    for(var i = 1 ; i < arguments.length; i++){
+        array[array.length] = arguments[i];
+    }
+    return array.length;
+}
+
+tests({
+    "(1) It should returns a value of the new length of the array.": function() {
+        var pushResult = push([1, 2], 3, 'a', 'z');
+        eq(pushResult, 5);
+    },
+    "(2) It should adds one or more elements to the end of an array": function() {
+        var arrayBeingPushed = [1, 2];
+        var pushResult = push(arrayBeingPushed, 3, 'a', 'z');
+        eq(pushResult, 5);
+        eq(arrayBeingPushed[0], 1);
+        eq(arrayBeingPushed[1], 2);
+        eq(arrayBeingPushed[2], 3);
+        eq(arrayBeingPushed[3], 'a');
+        eq(arrayBeingPushed[4], 'z');
+    },
+    "(3) It should keep the argument's reference.": function() {
+        var arrayBeingPushed = [1];
+        var arrayToPush = ["a", "z"];
+        var pushResult = push(arrayBeingPushed, arrayToPush);
+        eq(pushResult === 2, true);
+        eq(arrayBeingPushed[0], 1);
+        eq(arrayBeingPushed[1], arrayToPush);
+    },
+    "(4) It should throw an error when the first argument is not an array.": function() {
+        var isError1 = false;
+        try {
+            // string
+            push("This is a string");
+        } catch (e) {
+            isError1 = e instanceof Error;
+        }
+        eq(isError1, true);
+
+        var isError2 = false;
+        try {
+            // boolean
+            push(true);
+        } catch (e) {
+            isError2 = e instanceof Error;
+        }
+        eq(isError2, true);
+
+        var isError3 = false;
+        try {
+            // number
+            push(999);
+        } catch (e) {
+            isError3 = e instanceof Error;
+        }
+        eq(isError3, true);
+
+        var isError4 = false;
+        try {
+            // object
+            push({name: 'Apple', number: 3, color: 'red'});
+        } catch (e) {
+            isError4 = e instanceof Error;
+        }
+        eq(isError4, true);
+    }
+});
+
+</script>

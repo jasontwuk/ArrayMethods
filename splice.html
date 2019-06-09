@@ -1,0 +1,221 @@
+<script src="simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function splice(array, start, deleteCount, item1, itemN){
+//     var arrayLength = array.length;
+//     var spliceResult = [];
+//     var newArray = [];
+    
+//     var startingIndex = start ? start : 0;
+//     if(start < 0){
+//         startingIndex = arrayLength + start;
+//     } else if(start > arrayLength){
+//         startingIndex = arrayLength;
+//     }
+
+//     var deleteNumber = deleteCount? deleteCount : arrayLength - start;
+//     if(deleteCount >= arrayLength - start){
+//         deleteNumber = arrayLength - start;
+//     } else if (deleteCount === 0 || deleteCount < 0){
+//         deleteNumber = 0;
+//     }
+
+//     var itemLength = arguments.length > 3 ? arguments.length - 3: 0;
+
+//     for(var x = 0, i = startingIndex; x < deleteNumber, i < startingIndex + deleteNumber; x++, i++){
+//         spliceResult[x] = array[i];
+//     }
+
+//     for(var x = 0, i = 0; i < arrayLength; i++){
+//         if(i < startingIndex || i > startingIndex + deleteNumber - 1){
+//             newArray[x] = array[i];
+//             x++;
+//         }
+//     }
+
+//     array.length = 0;
+
+//     for(var z = 0; z < arrayLength - deleteCount + itemLength; z++){
+//         array[z] = newArray[z];
+//     }
+    
+//     return spliceResult;
+// }
+
+// Function signature:
+//  function splice(array, start[, deleteCount[, item1[, item2[, ...]]]])
+
+// callback parameters:
+
+// Return value:
+//  It should return an array that contain the deleted elements.
+//  It should return an empty array when no elements are removed.
+//  It should remove or replace existing emements and/or add new elements.
+
+
+function splice(array, start, deleteCount, item1, itemN){
+    // Fixed the array length. When callback mutate the array, it prevents infinite loop.
+    var arrayLength = array.length;
+    var argumentsLength = arguments.length;
+    var spliceResult = [];
+    var newArray = [];
+    
+    // set start value
+    var startingIndex = start ? start : 0;
+    if(start < 0){
+        startingIndex = arrayLength + start;
+    } else if(start > arrayLength){
+        startingIndex = arrayLength;
+    }
+
+    // set deleteCount value
+    var deleteNumber = deleteCount? deleteCount : arrayLength - start;
+    if(deleteCount >= arrayLength - start){
+        deleteNumber = arrayLength - start;
+    } else if(deleteCount === 0 || deleteCount < 0){
+        deleteNumber = 0;
+    }
+    //   when start > arrayLength, it won't remove anything
+    //   so set deleteNumber to 0 (this is for 2-3 equation)
+    if(start > arrayLength){
+        deleteNumber = 0;
+    }
+
+    // set item length value
+    var itemLength = argumentsLength > 3 ? argumentsLength - 3: 0;
+
+
+    // 1-1. get splice result
+    for(var x = 0, i = startingIndex; x < deleteNumber, i < startingIndex + deleteNumber; x++, i++){
+        spliceResult[x] = array[i];
+    }
+
+    // 2-1. put not deleted elements to newArray
+    for(var x = 0, i = 0; i < startingIndex; x++, i++){
+        newArray[x] = array[i];
+    }
+    for(var x = startingIndex + itemLength, i = startingIndex + deleteNumber; i < arrayLength; x++, i++){        
+        newArray[x] = array[i];
+    }
+    if(argumentsLength > 3){
+        var x = startingIndex;
+        for(var z = 3; z < argumentsLength; x++, z++){
+            newArray[x] = arguments[z];
+        }
+    }
+
+    // 2-2. delete all elements in array
+    array.length = 0;
+
+    // 2-3. restore not deleted elements to array
+    for(var z = 0; z < arrayLength - deleteNumber + itemLength; z++){
+        array[z] = newArray[z];
+    }
+
+    // 1-2. return splice result
+    return spliceResult;
+}
+
+tests({
+    "(1) It should return an array that contain the deleted elements.": function() {
+        var resultSplice = splice([1, 2, 3, 4, 5], 0, 3);
+        eq(Array.isArray(resultSplice), true);
+        eq(resultSplice.length, 3);
+        eq(resultSplice[0], 1);
+        eq(resultSplice[1], 2);
+        eq(resultSplice[2], 3);
+    },
+    "(2) It should return an empty array when no elements are removed.": function() {
+        var resultSplice = splice([1, 2, 3, 4, 5], 1, 0);
+        eq(Array.isArray(resultSplice), true);
+        eq(resultSplice.length, 0);
+    },
+    "(3) It should only remove elements from the array when no items.": function() {
+        var arrayBeingSpliceed = [1, 2, 3, 4, 5];
+        splice(arrayBeingSpliceed, 0, 3);
+        eq(arrayBeingSpliceed.length, 2);
+        eq(arrayBeingSpliceed[0], 4);
+        eq(arrayBeingSpliceed[1], 5);
+    },
+    "(4) It should replace existing emements and/or add new elements when has items.": function() {
+        var arrayBeingSpliceed = [1, 2, 3];
+        splice(arrayBeingSpliceed, 2, 1, "a", "b", "c");
+        eq(arrayBeingSpliceed.length, 5);
+        eq(arrayBeingSpliceed[0], 1);
+        eq(arrayBeingSpliceed[1], 2);
+        eq(arrayBeingSpliceed[2], "a");
+        eq(arrayBeingSpliceed[3], "b");
+        eq(arrayBeingSpliceed[4], "c");
+    },
+    "(5) It should start with arrayLength when start > arrayLength.": function() {
+        var arrayBeingSpliceed = [1, 2, 3, 4, 5];
+        var resultSplice = splice(arrayBeingSpliceed, 800, 3, "a", "b");
+        eq(Array.isArray(resultSplice), true);
+        eq(resultSplice.length, 0);
+        eq(arrayBeingSpliceed.length, 7);
+        eq(arrayBeingSpliceed[0], 1);
+        eq(arrayBeingSpliceed[1], 2);
+        eq(arrayBeingSpliceed[2], 3);
+        eq(arrayBeingSpliceed[3], 4);
+        eq(arrayBeingSpliceed[4], 5);
+        eq(arrayBeingSpliceed[5], "a");
+        eq(arrayBeingSpliceed[6], "b");
+    },
+    "(6) It should count from the end when start is negative.": function() {
+        var arrayBeingSpliceed = [1, 2, 3, 4, 5];
+        var resultSplice = splice(arrayBeingSpliceed, -2, 2, "a", "b");
+        eq(resultSplice.length, 2);
+        eq(resultSplice[0], 4);
+        eq(resultSplice[1], 5);
+        eq(arrayBeingSpliceed.length, 5);
+        eq(arrayBeingSpliceed[0], 1);
+        eq(arrayBeingSpliceed[1], 2);
+        eq(arrayBeingSpliceed[2], 3);
+        eq(arrayBeingSpliceed[3], "a");
+        eq(arrayBeingSpliceed[4], "b");
+    },
+    "(7) It should equal to arrayLength when no deleteCount.": function() {
+        var arrayBeingSpliceed = [1, 2, 3, 4, 5];
+        var resultSplice = splice(arrayBeingSpliceed, 3);
+        eq(resultSplice.length, 2);
+        eq(resultSplice[0], 4);
+        eq(resultSplice[1], 5);
+        eq(arrayBeingSpliceed.length, 3);
+        eq(arrayBeingSpliceed[0], 1);
+        eq(arrayBeingSpliceed[1], 2);
+        eq(arrayBeingSpliceed[2], 3);
+    },
+    "(8) It should equal to [arrayLength - start] when deleteCount = or > than [arrayLength - start].": function() {
+        var arrayBeingSpliceed = [1, 2, 3, 4, 5];
+        var resultSplice = splice(arrayBeingSpliceed, 3, 800);
+        eq(resultSplice.length, 2);
+        eq(resultSplice[0], 4);
+        eq(resultSplice[1], 5);
+        eq(arrayBeingSpliceed.length, 3);
+        eq(arrayBeingSpliceed[0], 1);
+        eq(arrayBeingSpliceed[1], 2);
+        eq(arrayBeingSpliceed[2], 3);
+    },
+    "(9) It should not remove any element when deleteCount is 0 or negative.": function() {
+        var arrayBeingSpliceed = [1, 2, 3, 4, 5];
+        // when deleteCount is 0
+        var resultSplice1 = splice(arrayBeingSpliceed, 3, 0);
+        eq(arrayBeingSpliceed.length, 5);
+        eq(resultSplice1.length, 0);
+
+        // when deleteCount is negative
+        var resultSplice2 = splice(arrayBeingSpliceed, 3, -800);
+        eq(arrayBeingSpliceed.length, 5);
+        eq(resultSplice2.length, 0);
+    },
+    "(10) It should change the array length when the number of added elements differs from the number of deleted ones.": function() {
+        var arrayBeingSpliceed = [1, 2, 3];
+        var originalLength = arrayBeingSpliceed.length;
+        var resultSplice = splice(arrayBeingSpliceed, 2, 0, "a", "b", "c");
+        var newLength = arrayBeingSpliceed.length;
+        eq(originalLength !== newLength, true);
+    }
+});
+
+</script>
